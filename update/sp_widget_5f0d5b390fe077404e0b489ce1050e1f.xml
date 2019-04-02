@@ -147,7 +147,8 @@
   if (!!table && !!field){
 console.log('We have table and field: ' + table + '|' + field);
 
-    data.options.chartTitle = $sp.getValue('title') || options.title;
+	  // After moving to scoped app, sp.getValue is getting the title from the service portal when embedded.
+    data.options.chartTitle =  options.title || $sp.getValue('title');
 
     data.options.table = table;
     data.options.display_field = field;
@@ -161,8 +162,6 @@ console.log('We have table and field: ' + table + '|' + field);
 		ga.addEncodedQuery(filter);
 	  }
     ga.query();
-	  console.log('What is the current query? ' + ga.getEncodedQuery());
-	  console.log('Query returned ' + ga.getRowCount() + ' records');
 
     var oth = 0;
     var othItems = [];
@@ -202,14 +201,14 @@ console.log('We have table and field: ' + table + '|' + field);
         <sys_created_by>nicholas.yancer</sys_created_by>
         <sys_created_on>2019-04-02 13:55:30</sys_created_on>
         <sys_id>5f0d5b390fe077404e0b489ce1050e1f</sys_id>
-        <sys_mod_count>6</sys_mod_count>
+        <sys_mod_count>8</sys_mod_count>
         <sys_name>Donut Chart 2.0</sys_name>
         <sys_package display_value="CreatorCon Lab - Single Page Apps" source="x_10227_creatorcon">cfea0f7d0fec37404e0b489ce1050e87</sys_package>
         <sys_policy/>
         <sys_scope display_value="CreatorCon Lab - Single Page Apps">cfea0f7d0fec37404e0b489ce1050e87</sys_scope>
         <sys_update_name>sp_widget_5f0d5b390fe077404e0b489ce1050e1f</sys_update_name>
         <sys_updated_by>nicholas.yancer</sys_updated_by>
-        <sys_updated_on>2019-04-02 14:20:10</sys_updated_on>
+        <sys_updated_on>2019-04-02 15:32:13</sys_updated_on>
         <template><![CDATA[<div class="chartContainer">
   <h3 class="text-center" ng-if="!!c.data.options.chartTitle">{{ c.data.options.chartTitle }}</h3>
   <canvas ng-if="!!c.data.chartData" id="pie" class="chart chart-doughnut" chart-data="c.data.chartData" chart-options="c.data.chartOptions" chart-labels="c.data.chartLabels" chart-click="c.onClick" chart-colors="c.data.chartColors">
