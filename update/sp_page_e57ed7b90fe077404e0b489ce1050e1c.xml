@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_page">
+    <sp_page action="INSERT_OR_UPDATE">
+        <category>custom</category>
+        <css/>
+        <draft>false</draft>
+        <dynamic_title_structure/>
+        <id>k19_cmdb_dashboard</id>
+        <internal>false</internal>
+        <public>false</public>
+        <roles/>
+        <short_description/>
+        <sys_class_name>sp_page</sys_class_name>
+        <sys_created_by>nicholas.yancer</sys_created_by>
+        <sys_created_on>2019-04-02 14:00:46</sys_created_on>
+        <sys_id>e57ed7b90fe077404e0b489ce1050e1c</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>k19_cmdb_dashboard</sys_name>
+        <sys_package display_value="CreatorCon Lab - Single Page Apps" source="x_10227_creatorcon">cfea0f7d0fec37404e0b489ce1050e87</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="CreatorCon Lab - Single Page Apps">cfea0f7d0fec37404e0b489ce1050e87</sys_scope>
+        <sys_update_name>sp_page_e57ed7b90fe077404e0b489ce1050e1c</sys_update_name>
+        <sys_updated_by>nicholas.yancer</sys_updated_by>
+        <sys_updated_on>2019-04-02 14:00:46</sys_updated_on>
+        <title>CMDB Dashboard</title>
+    </sp_page>
+    <sys_translated_text action="delete_multiple" query="documentkey=e57ed7b90fe077404e0b489ce1050e1c"/>
+</record_update>
