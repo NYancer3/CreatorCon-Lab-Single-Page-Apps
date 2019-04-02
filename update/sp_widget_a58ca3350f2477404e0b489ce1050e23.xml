@@ -2,16 +2,87 @@
     <sp_widget action="INSERT_OR_UPDATE">
         <category>standard</category>
         <client_script><![CDATA[function ($scope, spUtil, $location, spAriaFocusManager) {
-    /* This is the original code copied from the data table widget */
-    $scope.$on('data_table.click', function(e, parms){
-        var p = $scope.data.page_id || 'form';
-        var s = {id: p, table: parms.table, sys_id: parms.sys_id, view: 'sp'};
-        var newURL = $location.search(s);
-        spAriaFocusManager.navigateToLink(newURL.url());
-    });
+	/* This is the original code copied from the data table widget */
+	/*
+		LAB 3: We are going to remove the original code for the data_table.click event.
+		We will redefine what happens when the table is clicked.
+	*/
+	/*
+	$scope.$on('data_table.click', function(e, parms){
+		var p = $scope.data.page_id || 'form';
+		var s = {id: p, table: parms.table, sys_id: parms.sys_id, view: 'sp'};
+		var newURL = $location.search(s);
+		spAriaFocusManager.navigateToLink(newURL.url());
+	});
+	*/
+	/* END LAB 3 CHANGES */
 
-    /* Here is our code. We are just defining the "showTable" property for $scope. Defaulting to false. */
-    $scope.showTable = false;
+	/* Here is our code. We are just defining the "showTable" property for $scope. Defaulting to false. */
+	$scope.showTable = false;
+
+	/*
+		LAB 3: Everything from here to the end is new code.
+		1. We are going to "watch" for the "chart.click" event emitted by the embedded chart widget.
+		2. We are going to define a "formWidget" property for our current scope. Note that we modified the HTML in the previous step to check for this property.
+		3. We are going to redefine the "watch" on our data_table.click" event.
+		4. We are going to "watch" for an embedded modal's "closed" event.
+	*/
+	// Watch for the chart click event.
+	$scope.$on('chart.click',function(evt,parms){
+		console.log(parms);
+		// Toggle showTable to true to show the table
+		$scope.showTable = true;
+		/*
+			Let the table know about the updated filter.
+			Notice that we are "broadcasting" this "away" from rootScope.
+			This means that we are only notifying the data table that is embedded in this widget (or any of its descendants)
+			If we have multiple instance of this widget on the page (hint-hint!), then this event will not be visible to the other embedded tables.
+			The "setFilter" event is part of the out-of-the-box data table widget code.
+		*/
+		$scope.$broadcast('data_table.setFilter',parms.filter);
+	});
+
+	// When the table is clicked, show the target record in a form modal
+	// Define the formWidget property here, manage it elsewhere.
+	$scope.formWidget = '';
+
+	/*
+		Here we are changing what heppens when the data table is clicked.
+		This event is emitted (sent "toward" rootScope) by the out-of-the box data table widget.
+	*/
+	$scope.$on('data_table.click',function(evt,parms){
+		// Build params to get a form widget
+		var formOpts = {
+			embeddedWidgetId: 'widget-form',
+			embeddedWidgetOptions: {
+				table: parms.table,
+				sys_id: parms.sys_id,
+				view: 'sp',
+				disableUIActions: 'true',
+				hideRelatedLists: true
+			}
+		};
+
+		/*
+			Get our widget.
+			spUtil.get returns a "promise." This means it executes asynchronously and will "do something" when the promise "resolves" (is finished).
+			In our case, the result returned from a successful promise is a widget object that can be embedded.
+			When the promise resolves, we will set the formWidget property of our instance's scope to the result.
+			Note that we are not handling any promise failure. How would you do this?
+		*/
+		spUtil.get('widget-modal',formOpts).then(function(resp){
+			$scope.formWidget = resp;
+		});
+	});
+
+	/*
+		Watch for the modal widget being closed.
+		When the modal is closed, we will clear the formWidget property to make the HTML happy.
+	*/
+	$scope.$on('sp.widget-modal.closed',function(){
+		$scope.formWidget = '';
+	});
+	/* END LAB 3 CHANGES */
 }]]></client_script>
         <controller_as>c</controller_as>
         <css/>
@@ -25,7 +96,75 @@
         <internal>false</internal>
         <link><![CDATA[function link(scope, element, attrs, controller) {  }]]></link>
         <name>Combined Donut and Table</name>
-        <option_schema>[{"hint":"Size of the \"donut hole,\" default is 50%","name":"donut_cutout_percent","section":"Presentation","label":"Donut Cutout Percent","type":"integer"},{"hint":"Percent of a circle the chart should consume. Min 25%","name":"arc_percent","section":"Presentation","label":"Arc Percent","type":"integer"},{"hint":"Percentage to rotate the chart from 0 degrees vertical","name":"rotation_offset","section":"Presentation","label":"Rotation Offset","type":"integer"},{"hint":"Number of milliseconds it takes to animate the chart","name":"animation_speed","section":"Presentation","label":"Animation Speed","type":"choice","choices":[{"label":"0","value":"0"},{"label":"500","value":"500"},{"label":"750","value":"750"},{"label":"1000","value":"1000"},{"label":"1250","value":"1250"},{"label":"1500","value":"1500"}]},{"hint":"Identify the page to target when the chart is clicked. Default is \"list\"","name":"target_page","section":"Behavior","label":"Target Page","type":"string"}]</option_schema>
+        <option_schema>[&#13;
+	{&#13;
+		"hint":"Size of the \"donut hole,\" default is 50%",&#13;
+		"name":"donut_cutout_percent",&#13;
+		"section":"Presentation",&#13;
+		"label":"Donut Cutout Percent",&#13;
+		"type":"integer"&#13;
+	},&#13;
+	{&#13;
+		"hint":"Percent of a circle the chart should consume. Min 25%",&#13;
+		"name":"arc_percent",&#13;
+		"section":"Presentation",&#13;
+		"label":"Arc Percent",&#13;
+		"type":"integer"&#13;
+	},&#13;
+	{&#13;
+		"hint":"Percentage to rotate the chart from 0 degrees vertical",&#13;
+		"name":"rotation_offset",&#13;
+		"section":"Presentation",&#13;
+		"label":"Rotation Offset",&#13;
+		"type":"integer"&#13;
+	},&#13;
+	{&#13;
+		"hint":"Number of milliseconds it takes to animate the chart",&#13;
+		"name":"animation_speed",&#13;
+		"section":"Presentation",&#13;
+		"label":"Animation Speed",&#13;
+		"type":"choice",&#13;
+		"choices":[&#13;
+			{&#13;
+				"label":"0",&#13;
+				"value":"0"&#13;
+			},&#13;
+			{&#13;
+				"label":"500",&#13;
+				"value":"500"&#13;
+			},&#13;
+			{&#13;
+				"label":"750",&#13;
+				"value":"750"&#13;
+			},&#13;
+			{&#13;
+				"label":"1000",&#13;
+				"value":"1000"&#13;
+			},&#13;
+			{&#13;
+				"label":"1250",&#13;
+				"value":"1250"&#13;
+			},&#13;
+			{&#13;
+				"label":"1500",&#13;
+				"value":"1500"&#13;
+			}&#13;
+		]&#13;
+	},&#13;
+	{&#13;
+		"hint":"Identify the page to target when the chart is clicked. Default is \"list\"",&#13;
+		"name":"target_page",&#13;
+		"section":"Behavior",&#13;
+		"label":"Target Page",&#13;
+		"type":"string"&#13;
+	},{&#13;
+		"hint":"Indicate whether you want to emit an event when the chart is clicked or navigate to another page",&#13;
+		"name":"event_driven",&#13;
+		"section":"Behavior",&#13;
+		"label":"Event Driven",&#13;
+		"type":"boolean"&#13;
+	}&#13;
+]</option_schema>
         <public>false</public>
         <roles/>
         <script><![CDATA[(function(){
@@ -113,31 +252,36 @@
         <sys_created_by>nicholas.yancer</sys_created_by>
         <sys_created_on>2019-04-02 15:01:28</sys_created_on>
         <sys_id>a58ca3350f2477404e0b489ce1050e23</sys_id>
-        <sys_mod_count>8</sys_mod_count>
+        <sys_mod_count>9</sys_mod_count>
         <sys_name>Combined Donut and Table</sys_name>
         <sys_package display_value="CreatorCon Lab - Single Page Apps" source="x_10227_creatorcon">cfea0f7d0fec37404e0b489ce1050e87</sys_package>
         <sys_policy/>
         <sys_scope display_value="CreatorCon Lab - Single Page Apps">cfea0f7d0fec37404e0b489ce1050e87</sys_scope>
         <sys_update_name>sp_widget_a58ca3350f2477404e0b489ce1050e23</sys_update_name>
         <sys_updated_by>nicholas.yancer</sys_updated_by>
-        <sys_updated_on>2019-04-02 15:49:55</sys_updated_on>
+        <sys_updated_on>2019-04-02 16:23:23</sys_updated_on>
         <template><![CDATA[<div>
   <div class="alert alert-danger" ng-if="data.invalid_table">
-    ${Table not defined} '{{data.table_label}}'
+	${Table not defined} '{{data.table_label}}'
   </div>
   <!-- Toggle between chart and table view. The toggle will set the value of the showTable variable to true or false when clicked. Notice that we are binding the watchVar scope property in our directive to the current scope's showTable property through the watch-var attribute. -->
   <toggle-switch watch-var="showTable" title="Chart or Table" label-true="Table" label-false="Chart"></toggle-switch>
   <!-- If showTable is false, show the chart. Note the use of ng-if here. The angular chartJS code checks on the chart at regular intervals.
-        If the chart canvas is hidden when that check is performed there is an error and the next time you try to show the chart it will not render correctly. -->
+		If the chart canvas is hidden when that check is performed there is an error and the next time you try to show the chart it will not render correctly. -->
   <div ng-if="!showTable">
-    <sp-widget ng-if="!!data.donutWidget" widget="data.donutWidget"></sp-widget>
+	<sp-widget ng-if="!!data.donutWidget" widget="data.donutWidget"></sp-widget>
   </div>
 
   <!-- If showTable is true, then show the data table widget. Note that it is okay to use ng-show here,
-    as there is no requirement that the data table is visible for other processes. -->
+	as there is no requirement that the data table is visible for other processes. -->
   <div ng-show="showTable">
-    <sp-widget ng-if="data.dataTableWidget" widget="data.dataTableWidget"></sp-widget>
+	<sp-widget ng-if="data.dataTableWidget" widget="data.dataTableWidget"></sp-widget>
   </div>
+
+  <!-- LAB 3: If we have a form widget, embed it. We will instantiate a widget if we click on the data table. -->
+  <sp-widget ng-if="!!formWidget" widget="formWidget"></sp-widget>
+  <!-- END LAB 3 CHANGES -->
+
 </div>]]></template>
     </sp_widget>
 </record_update>

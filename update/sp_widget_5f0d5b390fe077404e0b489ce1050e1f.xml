@@ -2,67 +2,98 @@
     <sp_widget action="INSERT_OR_UPDATE">
         <category>custom</category>
         <client_script><![CDATA[function(spUtil,$scope,$rootScope,$location) {
-  /* widget controller */
-  var c = this;
+	/* widget controller */
+	var c = this;
 
-  // Here we define how the chart legend is displayed. How might you make this configurable?
-  c.data.chartLegend = {
-    display:true,
-    position:'bottom',
-    labels:{
-      boxWidth:15
-    }
-  };
+	/*
+		LAB 3: Make this widget async.
+		Calling c.server.update will call the server script and pass in our "data" object as "input."
+		This will refresh our "data" object, this time with data to render in the chart.
+	*/
+	c.server.update();
+	/* END LAB 3 CHANGES */
+	
+	// Here we define how the chart legend is displayed. How might you make this configurable?
+	c.data.chartLegend = {
+		display:true,
+		position:'bottom',
+		labels:{
+			boxWidth:15
+		}
+	};
 
-  // Here we are building our chart options. This controls the visual display and animations for the chart.
-  c.data.chartOptions = {
-    rotation:((-0.5 + (-c.data.options.chartRotation)/50)*Math.PI),
-    circumference:2*(c.data.options.chartCircumference/100)*Math.PI,
-    legend:c.data.chartLegend,
-    animation:{
-      duration: c.data.options.animate,
-      easing:'easeOutBounce'
-    },
-    cutoutPercentage:c.data.options.donut_cutout
-  };
+	// Here we are building our chart options. This controls the visual display and animations for the chart.
+	c.data.chartOptions = {
+		rotation:((-0.5 + (-c.data.options.chartRotation)/50)*Math.PI),
+		circumference:2*(c.data.options.chartCircumference/100)*Math.PI,
+		legend:c.data.chartLegend,
+		animation:{
+			duration: c.data.options.animate,
+			easing:'easeOutBounce'
+		},
+		cutoutPercentage:c.data.options.donut_cutout
+	};
 
-  // If we have a lot of text in our legend labels, decrease the font size for better display.
-  if (c.data.chartLabels.toString().length > 250){
-    c.data.chartLegend.labels.fontSize = 10;
-  }
+	// If we have a lot of text in our legend labels, decrease the font size for better display.
+	if (c.data.chartLabels.toString().length > 250){
+		c.data.chartLegend.labels.fontSize = 10;
+	}
 
-  // Here we define what happens when you click on the chart. The points argument contains information about the area that was clicked, and the evt argument contains information about the event itself. 
-  c.onClick = function (points, evt) {
+	// Here we define what happens when you click on the chart. The points argument contains information about the area that was clicked, and the evt argument contains information about the event itself. 
+	c.onClick = function (points, evt) {
 
-    // Check to see if we have anything in the points array
-    if (points.length > 0){
-      // The first member of the points array contains information about the portion of the chart we clicked. The _model property does not contain a "value," just a label which is why we built the "chartLookup" object to index based on display value.  
-      var filt = (!!c.data.options.filter ? c.data.options.filter + '^' : '') + c.data.options.display_field + c.data.chartLookup[points[0]._model.label];
-      
-      // Now we build an object for the click target. This will be used to add parameters to the URL location
-      var targObj = {
-        id: c.data.targetPage,
-        table:c.data.options.table,
-        filter:filt,
-        previous_id:c.data.currentPage,
-        view:'sp'
-      };
-      $location.search(targObj);
-    }
+		// Check to see if we have anything in the points array
+		if (points.length > 0){
+			// The first member of the points array contains information about the portion of the chart we clicked. The _model property does not contain a "value," just a label which is why we built the "chartLookup" object to index based on display value.  
+			var filt = (!!c.data.options.filter ? c.data.options.filter + '^' : '') + c.data.options.display_field + c.data.chartLookup[points[0]._model.label];
 
-  };
+			/*
+				LAB 3: If the widget options tell us we are event-driven, then emit an event.
+				We will rely on other widgets to "catch" and process this event.
+				We do this instead of navigating away from the page.
+			*/
+			if (c.data.options.event_driven == 'true'){
+				$scope.$emit('chart.click',{filter: filt});
+			} else {
+				// If not, then navigate like we did before.
+				/* END LAB 3 CHANGES */
+				
+				// Now we build an object for the click target. This will be used to add parameters to the URL location
+				var targObj = {
+					id: c.data.targetPage,
+					table:c.data.options.table,
+					filter:filt,
+					previous_id:c.data.currentPage,
+					view:'sp'
+				};
+				$location.search(targObj);
+			/*
+				LAB 3: We need to close our newly introduced "IF/ELSE" block.
+			*/
+			}
+			/* END LAB 3 CHANGES */
+		}
 
-  // We want to watch for any changes, so we will use the recordWatch functionality to keep the chart up to date
-  if (!!c.data.options.table){
-    spUtil.recordWatch($scope,c.data.options.table,c.data.options.filter);
-  }
+	};
+
+	// We want to watch for any changes, so we will use the recordWatch functionality to keep the chart up to date
+	if (!!c.data.options.table){
+		spUtil.recordWatch($scope,c.data.options.table,c.data.options.filter);
+	}
 
 }]]></client_script>
         <controller_as>c</controller_as>
         <css>div.chartContainer {&#13;
+&#13;
   max-width: 500px;&#13;
-  padding: 8px;&#13;
-  margin: auto !important; &#13;
+  /*&#13;
+      LAB 3: We are removing the "padding" from this CSS.&#13;
+  */&#13;
+  /* padding: 8px; */&#13;
+  /* END LAB 3 CHANGES */&#13;
+  &#13;
+  margin: auto !important;&#13;
+&#13;
 }</css>
         <data_table>sp_instance_table</data_table>
         <demo_data/>
@@ -76,139 +107,304 @@
   
 }]]></link>
         <name>Donut Chart 2.0</name>
-        <option_schema>[{"hint":"Size of the “donut hole,” default is 50%","name":"donut_cutout_percent","section":"Presentation","label":"Donut Cutout Percent","type":"integer"},{"hint":"Percent of a circle the chart should consume. Min 25%","name":"arc_percent","section":"Presentation","label":"Arc Percent","type":"integer"},{"hint":"Percentage to rotate the chart from 0 degrees vertical","name":"rotation_offset","section":"Presentation","label":"Rotation Offset","type":"integer"},{"hint":"Number of milliseconds it takes to animate the chart","name":"animation_speed","section":"Presentation","label":"Animation Speed","type":"choice","choices":[{"label":"0","value":"0"},{"label":"500","value":"500"},{"label":"750","value":"750"},{"label":"1000","value":"1000"},{"label":"1250","value":"1250"},{"label":"1500","value":"1500"}]},{"hint":"Identify the page to target when the chart is clicked. Default is “list”","name":"target_page","section":"Behavior","label":"Target Page","type":"string"}]</option_schema>
+        <option_schema>[&#13;
+	{&#13;
+		"hint":"Size of the \"donut hole,\" default is 50%",&#13;
+		"name":"donut_cutout_percent",&#13;
+		"section":"Presentation",&#13;
+		"label":"Donut Cutout Percent",&#13;
+		"type":"integer"&#13;
+	},&#13;
+	{&#13;
+		"hint":"Percent of a circle the chart should consume. Min 25%",&#13;
+		"name":"arc_percent",&#13;
+		"section":"Presentation",&#13;
+		"label":"Arc Percent",&#13;
+		"type":"integer"&#13;
+	},&#13;
+	{&#13;
+		"hint":"Percentage to rotate the chart from 0 degrees vertical",&#13;
+		"name":"rotation_offset",&#13;
+		"section":"Presentation",&#13;
+		"label":"Rotation Offset",&#13;
+		"type":"integer"&#13;
+	},&#13;
+	{&#13;
+		"hint":"Number of milliseconds it takes to animate the chart",&#13;
+		"name":"animation_speed",&#13;
+		"section":"Presentation",&#13;
+		"label":"Animation Speed",&#13;
+		"type":"choice",&#13;
+		"choices":[&#13;
+			{&#13;
+				"label":"0",&#13;
+				"value":"0"&#13;
+			},&#13;
+			{&#13;
+				"label":"500",&#13;
+				"value":"500"&#13;
+			},&#13;
+			{&#13;
+				"label":"750",&#13;
+				"value":"750"&#13;
+			},&#13;
+			{&#13;
+				"label":"1000",&#13;
+				"value":"1000"&#13;
+			},&#13;
+			{&#13;
+				"label":"1250",&#13;
+				"value":"1250"&#13;
+			},&#13;
+			{&#13;
+				"label":"1500",&#13;
+				"value":"1500"&#13;
+			}&#13;
+		]&#13;
+	},&#13;
+	{&#13;
+		"hint":"Identify the page to target when the chart is clicked. Default is \"list\"",&#13;
+		"name":"target_page",&#13;
+		"section":"Behavior",&#13;
+		"label":"Target Page",&#13;
+		"type":"string"&#13;
+	},{&#13;
+		"hint":"Indicate whether you want to emit an event when the chart is clicked or navigate to another page",&#13;
+		"name":"event_driven",&#13;
+		"section":"Behavior",&#13;
+		"label":"Event Driven",&#13;
+		"type":"boolean"&#13;
+	}&#13;
+]</option_schema>
         <public>false</public>
         <roles/>
         <script><![CDATA[(function() {
-  /* populate the 'data' object */
-  /* e.g., data.table = $sp.getValue('table'); */
-
-  // Instantiate a container for our chart options. We will get these from the widget instance options.
-  data.options = {};
-
-  // Here we define the table, "group by" field, and initial filter for the chart
-  var table = $sp.getValue('table') || options.table;
-  var field = $sp.getValue('display_field') || options.display_field;
-  var filter = $sp.getValue('filter') || options.filter;
-
-  data.currentPage = $sp.getParameter('id');
-  
-  // Instantiate axis labels and data containers.
-  data.chartLabels = [];
-  data.chartData = [];
-  
-  // We will need to make an index of field values to query conditions. We will need this for the click actions on our chart; when you click the chart, we will get the query value to send to the list based on the value of the slice you clicked.
-  data.chartLookup = {};
-  
-  // We can either specify a target page for our chart, or default to the "list" page
-  data.targetPage = options.target_page || 'list';
-
-  // Here we start setting our chart options. Note the defaults in case you do not enter any instance options
-  // Animation Speed, default 1000
-  data.options.animate = parseInt(options.animation_speed);
-  if (isNaN(parseInt(data.options.animate))){
-    data.options.animate = 1000;
-  }
-
-  // donut_coutout_percent, default 50, min 0, max 90
-  data.options.donut_cutout = options.donut_cutout_percent;
-  data.options.orig_cutout = data.options.donut_cutout;
-  if (isNaN(parseInt(data.options.donut_cutout)) || data.options.donut_cutout < 0 || data.options.donut_cutout > 90){
-    data.options.donut_cutout = 50;
-  }
-
-  // Arc percent, default 0
-  data.options.chartRotation = options.rotation_offset || 0;
-
-  // Chart circumference, default 100. Min 25, max 100.
-  data.options.circ = options.arc_percent;
-  data.options.chartCircumference = parseInt(options.arc_percent) || 100;
-  if (isNaN(parseInt(data.options.chartCircumference)) || data.options.chartCircumference < 25 || data.options.chartCircumference > 100){
-    data.options.chartCircumference = 100;
-  }
-
-  // We can use the built-in chart colors settings. This allows you to define colors per table to be used in this or other out-of-the-box rerports
-  function getColors(tbl,fld){
-    var retArr = [];
-    var g_colors = new GlideChartFieldColors(tbl,fld);
-    data.chartLabels.forEach(function(lbl){
-      var val = data.chartLookup[lbl];
-      var col = val.split('=');
-      col = (col.length > 1 ? col[1] : col[0]).toString();
-      retArr.push(g_colors.get(col));
-    });
-
-    console.log(retArr);
-
-    return retArr;
-  }
-
-  // If we have defined a table and field for this widget in the instance options, get the data to build the chart
-  if (!!table && !!field){
-console.log('We have table and field: ' + table + '|' + field);
-
-	  // After moving to scoped app, sp.getValue is getting the title from the service portal when embedded.
-    data.options.chartTitle =  options.title || $sp.getValue('title');
-
-    data.options.table = table;
-    data.options.display_field = field;
-    data.options.filter = filter;
-
-    var ga = new GlideAggregate(table);
-    ga.addAggregate('COUNT',field);
-    ga.orderByAggregate('COUNT',field);
-	  // After moving to scoped app, adding the encoded query causes an error if the "filter" variable is empty
-	  if(!!filter){
-		ga.addEncodedQuery(filter);
-	  }
-    ga.query();
-
-    var oth = 0;
-    var othItems = [];
-
-    // We are setting a hard limit of 12 items for an "other" group. How might you make this configurable?
-    while (ga.next() && oth < 12){
-      var disp = !!ga.getDisplayValue(field) ? ga.getDisplayValue(field) : '(Empty)';
-      data.chartLabels.push(disp);
-      data.chartLookup[disp] = '=' + ga.getValue(field);
-      othItems.push(ga.getValue(field));
-      data.chartData.push(ga.getAggregate('COUNT',field));
-      oth++;
-    }
-
-    // If we have reached our threshold for "Other," then our query should be anything that does not match what we have used so far
-    if (oth == 12){
-      var gr = new GlideRecord(table);
-      gr.addEncodedQuery(filter);
-      gr.addQuery(field,'NOT IN',othItems.toString());
-      gr.query();
-
-      if (gr.getRowCount() > 0){
-        data.chartLabels.push('Other');
-        data.chartLookup['Other'] = 'NOT IN' + othItems;
-        data.chartData.push(gr.getRowCount());
-      }
-    }
-
-	  // The chart color API is not available from scoped apps. Removing.
-    //data.chartColors = getColors(table,field);
-
-  }
-
+	/* populate the 'data' object */
+	/* e.g., data.table = $sp.getValue('table'); */
+	
+	// Instantiate a container for our chart options. We will get these from the widget instance options.
+	data.options = {
+		
+	};
+	
+	// Here we define the table, "group by" field, and initial filter for the chart
+	/*
+	LAB 3: Add "input" properties to our assignments. This will allow the server script to be called asynchronously from the client script.
+ 	*/
+	var table = $sp.getValue('table') || options.table || input.table;
+	var field = $sp.getValue('display_field') || options.display_field || input.display_field;
+	var filter = options.filter || (!!input && !!input.filter ? input.filter : null) || $sp.getValue('filter');
+	/* END LAB 3 CHANGE */
+	
+	/*
+	LAB 3: We need to set some properties on the "data" object.
+	These will passed back to this script as "input" from the client.
+	Necessary for asynchronous functionality.
+ 	*/
+	data.table = table;
+	data.filter = filter;
+	data.display_field = field;
+	/* END LAB 3 CHANGE */
+	
+	/*
+	LAB 3: Are we event-driven? If nothing given, default to false.
+ 	*/
+	data.options.event_driven = options.event_driven || (!!input && !!input.event_driven ? input.event_driven : null) || 'false';
+	data.event_driven = data.options.event_driven;
+	/* END LAB 3 CHANGE */
+	
+	data.currentPage = $sp.getParameter('id');
+	
+	// Instantiate axis labels and data containers.
+	data.chartLabels = [];
+	data.chartData = [];
+	
+	// We will need to make an index of field values to query conditions. We will need this for the click actions on our chart; when you click the chart, we will get the query value to send to the list based on the value of the slice you clicked.
+	data.chartLookup = {
+		
+	};
+	
+	// We can either specify a target page for our chart, or default to the "list" page
+	/*
+	LAB 3: Note the addition, again, of "input" to our checks for populating this property.
+ 	*/
+	data.targetPage = options.target_page || (!!input && !!input.target_page ? input.target_page : null) || 'list';
+	/* END LAB 3 CHANGE */
+	
+	// Here we start setting our chart options. Note the defaults in case you do not enter any instance options
+	// Animation Speed, default 1000
+	/*
+	LAB 3: We are going to put animation speed into a variable.
+	In the original script, we werer getting this from "options."
+	However, we need to also check "input" for a value, so we do that in a variable.
+	Note that we are using the variable on the very next line.
+ 	*/
+	var anim_speed = options.animation_speed || (!!input && !!input.animation_speed ? input.animation_speed : null);
+	data.options.animate = parseInt(anim_speed);
+	/* END LAB 3 CHANGE */
+	
+	if (isNaN(parseInt(data.options.animate))){
+		data.options.animate = 1000;
+	}
+	
+	/*
+	LAB 3: We are having some issues when the value is 0.
+	Also, note that we are also checking "input" for the donut_coutout_percent value.
+ 	*/
+	if (!!options && options.donut_cutout_percent == 0){
+		data.donut_cutout_percent = '0';
+	} else if (!!input && input.donut_cutout_percent == 0){
+		data.donut_cutout_percent = '0';
+	} else {
+		data.donut_cutout_percent = options.donut_cutout_percent || input.donut_cutout_percent;
+	}
+	/* END LAB 3 CHANGE */
+	
+	// donut_coutout_percent, default 50, min 0, max 90
+	/*
+	LAB 3: Note that we are setting the property from "data" this time (set above)
+	and not from "options" directly.
+	This is because a value of zero was previously causing issues AND because we want to include "input" in our checks for this value.
+ 	*/
+	data.options.donut_cutout = data.donut_cutout_percent;
+	/* END LAB 3 CHANGE */
+	
+	data.options.orig_cutout = data.options.donut_cutout;
+	if (isNaN(parseInt(data.options.donut_cutout)) || data.options.donut_cutout < 0 || data.options.donut_cutout > 90){
+		data.options.donut_cutout = 50;
+	}
+	
+	// Arc percent, default 0
+	/*
+	LAB 3: Note that we are also checking "input" for this value.
+ 	*/
+	data.options.chartRotation = options.rotation_offset || (!!input && !!input.rotation_offset ? input.rotation_offset : null)|| 0;
+	/* END LAB 3 CHANGE */
+	
+	/*
+	LAB 3: We want to store the result from above as a property of "data."
+	This will come through as "input" the next time this server code is called from the client.
+ 	*/
+	data.rotation_offset =  data.options.chartRotation;
+	/* END LAB 3 CHANGE */
+	
+	// Chart circumference, default 100. Min 25, max 100.
+	/*
+	LAB 3: Note that we are adding a check on "input."
+	We are also storing the result to the "data" object to be used as "input" from the client.
+	Also note that when we set the "data.options" property, we are using what we determined for data.circ as the value.
+ 	*/
+	data.options.circ = options.arc_percent || input.arc_percent;
+	data.arc_percent = data.options.circ;
+	data.options.chartCircumference = parseInt(data.options.circ) || 100;
+	/* END LAB 3 CHANGE */
+	
+	if (isNaN(parseInt(data.options.chartCircumference)) || data.options.chartCircumference < 25 || data.options.chartCircumference > 100){
+		data.options.chartCircumference = 100;
+	}
+	
+	/*
+	LAB 3: We want to store the title to the "data" object.
+	Again, this will be passed in as "input" from the client script.
+ 	*/
+	data.title = options.title || input.title;
+	
+	/*
+	LAB 3: Execute asynchronously.
+	If we do not have "input" defined, then this is not being called from the client and we should just return.
+ 	*/
+	if (!input){
+		return;
+	}
+	
+	// If we are executing asynchronously, let's see what "data" looks like in the console.
+	console.log(data);
+	/* END LAB 3 CHANGE */
+	
+	// We can use the built-in chart colors settings. This allows you to define colors per table to be used in this or other out-of-the-box rerports
+	function getColors(tbl,fld){
+		var retArr = [];
+		var g_colors = new GlideChartFieldColors(tbl,fld);
+		data.chartLabels.forEach(function(lbl){
+			var val = data.chartLookup[lbl];
+			var col = val.split('=');
+			col = (col.length > 1 ? col[1] : col[0]).toString();
+			retArr.push(g_colors.get(col));
+		});
+		
+		console.log(retArr);
+		
+		return retArr;
+	}
+	
+	// If we have defined a table and field for this widget in the instance options, get the data to build the chart
+	if (!!table && !!field){
+		
+		/*
+		LAB 3: We have added a check on "input" for asynchronous execution.
+ 		*/
+		data.options.chartTitle = options.title || input.title || $sp.getValue('title');
+		/* END LAB 3 CHANGE */
+		
+		data.options.table = table;
+		data.options.display_field = field;
+		data.options.filter = filter;
+		
+		var ga = new GlideAggregate(table);
+		ga.addAggregate('COUNT',field);
+		ga.orderByAggregate('COUNT',field);
+		// After moving to scoped app, adding the encoded query causes an error if the "filter" variable is empty
+		if(!!filter){
+			ga.addEncodedQuery(filter);
+		}
+		ga.query();
+		
+		var oth = 0;
+		var othItems = [];
+		
+		// We are setting a hard limit of 12 items for an "other" group. How might you make this configurable?
+		while (ga.next() && oth < 12){
+			var disp = !!ga.getDisplayValue(field) ? ga.getDisplayValue(field) : '(Empty)';
+			data.chartLabels.push(disp);
+			data.chartLookup[disp] = '=' + ga.getValue(field);
+			othItems.push(ga.getValue(field));
+			data.chartData.push(ga.getAggregate('COUNT',field));
+			oth++;
+		}
+		
+		// If we have reached our threshold for "Other," then our query should be anything that does not match what we have used so far
+		if (oth == 12){
+			var gr = new GlideRecord(table);
+			gr.addEncodedQuery(filter);
+			gr.addQuery(field,'NOT IN',othItems.toString());
+			gr.query();
+			
+			if (gr.getRowCount() > 0){
+				data.chartLabels.push('Other');
+				data.chartLookup['Other'] = 'NOT IN' + othItems;
+				data.chartData.push(gr.getRowCount());
+			}
+		}
+		
+		// The chart color API is not available from scoped apps. Removing.
+		//data.chartColors = getColors(table,field);
+		
+	}
+	
 })();]]></script>
         <servicenow>false</servicenow>
         <sys_class_name>sp_widget</sys_class_name>
         <sys_created_by>nicholas.yancer</sys_created_by>
         <sys_created_on>2019-04-02 13:55:30</sys_created_on>
         <sys_id>5f0d5b390fe077404e0b489ce1050e1f</sys_id>
-        <sys_mod_count>8</sys_mod_count>
+        <sys_mod_count>18</sys_mod_count>
         <sys_name>Donut Chart 2.0</sys_name>
         <sys_package display_value="CreatorCon Lab - Single Page Apps" source="x_10227_creatorcon">cfea0f7d0fec37404e0b489ce1050e87</sys_package>
         <sys_policy/>
         <sys_scope display_value="CreatorCon Lab - Single Page Apps">cfea0f7d0fec37404e0b489ce1050e87</sys_scope>
         <sys_update_name>sp_widget_5f0d5b390fe077404e0b489ce1050e1f</sys_update_name>
         <sys_updated_by>nicholas.yancer</sys_updated_by>
-        <sys_updated_on>2019-04-02 15:32:13</sys_updated_on>
+        <sys_updated_on>2019-04-02 16:30:18</sys_updated_on>
         <template><![CDATA[<div class="chartContainer">
   <h3 class="text-center" ng-if="!!c.data.options.chartTitle">{{ c.data.options.chartTitle }}</h3>
   <canvas ng-if="!!c.data.chartData" id="pie" class="chart chart-doughnut" chart-data="c.data.chartData" chart-options="c.data.chartOptions" chart-labels="c.data.chartLabels" chart-click="c.onClick" chart-colors="c.data.chartColors">
