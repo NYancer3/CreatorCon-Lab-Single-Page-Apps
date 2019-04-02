@@ -2,12 +2,16 @@
     <sp_widget action="INSERT_OR_UPDATE">
         <category>standard</category>
         <client_script><![CDATA[function ($scope, spUtil, $location, spAriaFocusManager) {
-	$scope.$on('data_table.click', function(e, parms){
-		var p = $scope.data.page_id || 'form';
-		var s = {id: p, table: parms.table, sys_id: parms.sys_id, view: 'sp'};
-		var newURL = $location.search(s);
-		spAriaFocusManager.navigateToLink(newURL.url());
-	});
+    /* This is the original code copied from the data table widget */
+    $scope.$on('data_table.click', function(e, parms){
+        var p = $scope.data.page_id || 'form';
+        var s = {id: p, table: parms.table, sys_id: parms.sys_id, view: 'sp'};
+        var newURL = $location.search(s);
+        spAriaFocusManager.navigateToLink(newURL.url());
+    });
+
+    /* Here is our code. We are just defining the "showTable" property for $scope. Defaulting to false. */
+    $scope.showTable = false;
 }]]></client_script>
         <controller_as>c</controller_as>
         <css/>
@@ -109,22 +113,31 @@
         <sys_created_by>nicholas.yancer</sys_created_by>
         <sys_created_on>2019-04-02 15:01:28</sys_created_on>
         <sys_id>a58ca3350f2477404e0b489ce1050e23</sys_id>
-        <sys_mod_count>7</sys_mod_count>
+        <sys_mod_count>8</sys_mod_count>
         <sys_name>Combined Donut and Table</sys_name>
         <sys_package display_value="CreatorCon Lab - Single Page Apps" source="x_10227_creatorcon">cfea0f7d0fec37404e0b489ce1050e87</sys_package>
         <sys_policy/>
         <sys_scope display_value="CreatorCon Lab - Single Page Apps">cfea0f7d0fec37404e0b489ce1050e87</sys_scope>
         <sys_update_name>sp_widget_a58ca3350f2477404e0b489ce1050e23</sys_update_name>
         <sys_updated_by>nicholas.yancer</sys_updated_by>
-        <sys_updated_on>2019-04-02 15:40:59</sys_updated_on>
+        <sys_updated_on>2019-04-02 15:49:55</sys_updated_on>
         <template><![CDATA[<div>
-    <div class="alert alert-danger" ng-if="data.invalid_table">
-        ${Table not defined} '{{data.table_label}}'
-    </div>
-    <!-- Embed our chart widget, if we were able to generate one -->
+  <div class="alert alert-danger" ng-if="data.invalid_table">
+    ${Table not defined} '{{data.table_label}}'
+  </div>
+  <!-- Toggle between chart and table view. The toggle will set the value of the showTable variable to true or false when clicked. Notice that we are binding the watchVar scope property in our directive to the current scope's showTable property through the watch-var attribute. -->
+  <toggle-switch watch-var="showTable" title="Chart or Table" label-true="Table" label-false="Chart"></toggle-switch>
+  <!-- If showTable is false, show the chart. Note the use of ng-if here. The angular chartJS code checks on the chart at regular intervals.
+        If the chart canvas is hidden when that check is performed there is an error and the next time you try to show the chart it will not render correctly. -->
+  <div ng-if="!showTable">
     <sp-widget ng-if="!!data.donutWidget" widget="data.donutWidget"></sp-widget>
-    <!-- Embed our data table widget, if we were able to generate one -->
+  </div>
+
+  <!-- If showTable is true, then show the data table widget. Note that it is okay to use ng-show here,
+    as there is no requirement that the data table is visible for other processes. -->
+  <div ng-show="showTable">
     <sp-widget ng-if="data.dataTableWidget" widget="data.dataTableWidget"></sp-widget>
+  </div>
 </div>]]></template>
     </sp_widget>
 </record_update>

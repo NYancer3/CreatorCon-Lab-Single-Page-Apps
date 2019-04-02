@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_js_include">
+    <sp_js_include action="INSERT_OR_UPDATE">
+        <display_name>Toggle Switch JS</display_name>
+        <source>local</source>
+        <sys_class_name>sp_js_include</sys_class_name>
+        <sys_created_by>nicholas.yancer</sys_created_by>
+        <sys_created_on>2019-04-02 15:48:33</sys_created_on>
+        <sys_id>56b6bffd0f2477404e0b489ce1050e4a</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>Toggle Switch JS</sys_name>
+        <sys_package display_value="CreatorCon Lab - Single Page Apps" source="x_10227_creatorcon">cfea0f7d0fec37404e0b489ce1050e87</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="CreatorCon Lab - Single Page Apps">cfea0f7d0fec37404e0b489ce1050e87</sys_scope>
+        <sys_ui_script display_value="x_10227_creatorcon.toggleSwitch">d1c6fffd0f2477404e0b489ce1050e0c</sys_ui_script>
+        <sys_update_name>sp_js_include_56b6bffd0f2477404e0b489ce1050e4a</sys_update_name>
+        <sys_updated_by>nicholas.yancer</sys_updated_by>
+        <sys_updated_on>2019-04-02 15:48:33</sys_updated_on>
+        <url/>
+    </sp_js_include>
+</record_update>

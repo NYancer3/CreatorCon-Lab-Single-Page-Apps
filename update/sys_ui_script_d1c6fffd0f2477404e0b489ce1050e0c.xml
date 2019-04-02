@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_ui_script">
+    <sys_ui_script action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <description/>
+        <global>false</global>
+        <name>x_10227_creatorcon.toggleSwitch</name>
+        <script><![CDATA[angular.module('css-toggle-switch',[]).directive('toggleSwitch',[function(){
+    // We can define default values in order to make certian directive attributes optional
+    var defaults = {
+        labelTrue: 'On',
+        labelFalse: 'Off'
+    };
+
+    return {
+        restrict: 'E', // This directive must be called as an HTML element
+        scope: {
+            watchVar: '=', // The watch-var attrribute of the element should pass in a variable, expecting an object
+            title: '@' // the title attribute of the element should resolve to a string
+        },
+        template: '<div>' +
+        '<label class="switch-light" onclick="">' +
+        '<input type="checkbox" ng-model="watchVar">' +
+        '<strong>' +
+        '{{ title }}' +
+            '</strong>' +
+            '<span class="alert alert-light">' +
+                '<span>{{ labelFalse }}</span>' +
+                '<span>{{ labelTrue }}</span>' +
+                '<a class="btn btn-primary"></a>' +
+            '</span>' +
+        '</label>' +
+        '</div>' +
+        '<style>' +
+        '.switch-light {' +
+            ' max-width: 125px; '+
+            '}' +
+            '.switch-light .alert-light {' +
+            '      border: 1px solid #e2e2e2;' +
+            '}' +
+        '</style>',
+        compile: function(){
+            // We use the compile method to handle assigning the default values we defined at the start of this directive, if necessary
+            return {
+            pre: function(scope,el,attrs){
+            // Set defaults for labels if nothing passed into the directive
+            scope.labelTrue = attrs.labelTrue || defaults.labelTrue;
+            scope.labelFalse = attrs.labelFalse || defaults.labelFalse;
+            },
+            post: function(scope,el,attrs){
+
+            }
+        };
+    }
+    };
+}]);]]></script>
+        <script_name>toggleSwitch</script_name>
+        <sys_class_name>sys_ui_script</sys_class_name>
+        <sys_created_by>nicholas.yancer</sys_created_by>
+        <sys_created_on>2019-04-02 15:48:26</sys_created_on>
+        <sys_id>d1c6fffd0f2477404e0b489ce1050e0c</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>x_10227_creatorcon.toggleSwitch</sys_name>
+        <sys_package display_value="CreatorCon Lab - Single Page Apps" source="x_10227_creatorcon">cfea0f7d0fec37404e0b489ce1050e87</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="CreatorCon Lab - Single Page Apps">cfea0f7d0fec37404e0b489ce1050e87</sys_scope>
+        <sys_update_name>sys_ui_script_d1c6fffd0f2477404e0b489ce1050e0c</sys_update_name>
+        <sys_updated_by>nicholas.yancer</sys_updated_by>
+        <sys_updated_on>2019-04-02 15:48:26</sys_updated_on>
+        <ui_type>1</ui_type>
+        <use_scoped_format>false</use_scoped_format>
+    </sys_ui_script>
+</record_update>
