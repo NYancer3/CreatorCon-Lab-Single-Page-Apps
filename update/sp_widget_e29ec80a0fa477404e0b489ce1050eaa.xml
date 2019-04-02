@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <category>custom</category>
+        <client_script><![CDATA[function(k19PageManager,$scope) {
+	/*
+	Note that we are injecting a dependency for the k19PageManager service.
+	Don't forget to add this dependency to the related list for the widget!
+	*/
+	/* widget controller */
+	var c = this;
+
+	// Create a local reference to the k19PageManager service for convenience and to use in the HTML template.
+	c.pm = k19PageManager;
+
+	// reset on page load
+	c.pm.reset();
+
+	/*
+	Bind the service's pageComponents property to a local scope property.
+	This is mainly for convenience. See how much shorter it is?
+	I'm too lazy to type out the whole thing every time I need to refere to it.
+
+	It also allows us to use $scope.$watch() to react to changes. Which is useful, too, I guess.
+	*/
+	$scope.pc = c.pm.pageComponents;
+
+	/*
+	Watch for changes to the service's pageComponents property.
+	Note the "true" parameter we are passing into the $watch method.
+	This is because paegComponents is an array, so we need to do a "deep watch" on the entire thing.
+	*/
+	$scope.$watch('pc',function(newVal,oldVal){
+		// If we do not have a current component, set it to the first one.
+		if (Object.keys(c.pm.pageComponents).length > 0 && !c.pm.currentComponent){
+			var currKey = Object.keys(c.pm.pageComponents)[0];
+			c.pm.setCurrent(currKey);
+		}
+	},true);
+
+}]]></client_script>
+        <controller_as>c</controller_as>
+        <css>.nav-tabs &gt; li &gt; a {&#13;
+      border: 1px solid #ddd !important;&#13;
+      background-color: #e6e6e6;&#13;
+}&#13;
+&#13;
+.nav-tabs &gt; li &gt; a:hover, .nav-tabs &gt; li &gt; a:focus {&#13;
+     background-color: #fff;&#13;
+}&#13;
+&#13;
+.nav-tabs &gt; li.active &gt; a, .nav-tabs &gt; li.active &gt; a:focus {&#13;
+ background-color: #fff; &#13;
+}&#13;
+&#13;
+.nav-tabs &gt; li.active &gt; a:hover {&#13;
+  background-color: lightGray;&#13;
+}&#13;
+.badge {&#13;
+  background-color: darkGray;&#13;
+}</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description/>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id/>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {
+  
+}]]></link>
+        <name>Page Governor</name>
+        <option_schema/>
+        <public>false</public>
+        <roles/>
+        <script><![CDATA[(function() {
+  /* populate the 'data' object */
+  /* e.g., data.table = $sp.getValue('table'); */
+
+})();]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>nicholas.yancer</sys_created_by>
+        <sys_created_on>2019-04-02 17:31:01</sys_created_on>
+        <sys_id>e29ec80a0fa477404e0b489ce1050eaa</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>Page Governor</sys_name>
+        <sys_package display_value="CreatorCon Lab - Single Page Apps" source="x_10227_creatorcon">cfea0f7d0fec37404e0b489ce1050e87</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="CreatorCon Lab - Single Page Apps">cfea0f7d0fec37404e0b489ce1050e87</sys_scope>
+        <sys_update_name>sp_widget_e29ec80a0fa477404e0b489ce1050eaa</sys_update_name>
+        <sys_updated_by>nicholas.yancer</sys_updated_by>
+        <sys_updated_on>2019-04-02 17:31:01</sys_updated_on>
+        <template><![CDATA[<div>
+	<!-- If there are no components registered on the page, say so. -->
+  <p ng-if="!c.pm.currentComponent">No Components</p>
+	<!-- Here we display a tab for each component registered with our k19PageManager service.
+		We assign an "active" class to the tab if it corresponds to the currentComponent registered with the service.
+		Note that in each list item, we are accessing scope properties directly from the component widgets.
+		In this case, we know something about the components in advance.
+		Can you think of a way to manage this without using properties directly from the component scope?
+		We are using tabs here, but can you think of how you may use this to build a left-hand nav menu? -->
+  <ul class="nav nav-tabs">
+    <li ng-class="{'active': comp.rectangle_id == c.pm.currentComponent}" ng-repeat="comp in c.pm.pageComponents" ng-click="c.pm.setCurrent(comp.rectangle_id);"><a href="javascript: void(0)">{{ comp.data.title }} <span class="badge" ng-if="!!comp.data.recordCount">{{  comp.data.recordCount  }}</span></a></li>
+  </ul>
+</div>]]></template>
+    </sp_widget>
+</record_update>

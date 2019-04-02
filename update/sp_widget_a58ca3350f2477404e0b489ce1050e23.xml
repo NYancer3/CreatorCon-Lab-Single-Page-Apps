@@ -1,13 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
     <sp_widget action="INSERT_OR_UPDATE">
         <category>standard</category>
-        <client_script><![CDATA[function ($scope, spUtil, $location, spAriaFocusManager) {
-	/* This is the original code copied from the data table widget */
-	/*
-		LAB 3: We are going to remove the original code for the data_table.click event.
-		We will redefine what happens when the table is clicked.
-	*/
-	/*
+        <client_script><![CDATA[function ($scope, spUtil, $location, spAriaFocusManager, k19PageManager,$http) {
+/*
+	LAB 4: We are adding dependencies to the k19PageManager service as well as the $http service.
+	Do not forget to add the k19PageManager service to the dependencies related list on the widget!
+*/
+/* END LAB 4 CHANGES */
+
+/* This is the original code copied from the data table widget */
+/*
+	LAB 3: We are going to remove the original code for the data_table.click event.
+	We will redefine what happens when the table is clicked.
+*/
+/*
 	$scope.$on('data_table.click', function(e, parms){
 		var p = $scope.data.page_id || 'form';
 		var s = {id: p, table: parms.table, sys_id: parms.sys_id, view: 'sp'};
@@ -15,19 +21,53 @@
 		spAriaFocusManager.navigateToLink(newURL.url());
 	});
 	*/
-	/* END LAB 3 CHANGES */
+/* END LAB 3 CHANGES */
+
+/*
+	LAB 4: This is where we really start interacting with the k19PageManager service.
+	There is not much to it. We are going to create and store a recordCount poroperty in our scope, which will be read by the Page Governor widget we created in the last step.
+	Then, we register the widget with the k19PageManager service. The other widgets will do the rest.
+	Later, we will just need to keep the record count up to date.
+*/
+	var c = this;
+
+	// Get record count to send up to the tabs
+	$scope.data.recordCount = 0;
+
+	c.pm = k19PageManager;
+
+	// Register ourselves with the Page Manager service.
+	k19PageManager.registerComponent(this.widget);
+
+/* END LAB 4 CHANGES */
 
 	/* Here is our code. We are just defining the "showTable" property for $scope. Defaulting to false. */
 	$scope.showTable = false;
 
-	/*
-		LAB 3: Everything from here to the end is new code.
-		1. We are going to "watch" for the "chart.click" event emitted by the embedded chart widget.
-		2. We are going to define a "formWidget" property for our current scope. Note that we modified the HTML in the previous step to check for this property.
-		3. We are going to redefine the "watch" on our data_table.click" event.
-		4. We are going to "watch" for an embedded modal's "closed" event.
-	*/
-	// Watch for the chart click event.
+/*
+	LAB 4: Here we define a function to update the record count based on our filter.
+	We use a direct table GET web service call to do the query and update our recordCount property with the result.
+	Then, we call the function.
+*/
+	function getCount(flt){
+		// Told you we would use web services!
+		$http.get('/api/now/table/' + $scope.data.table + '?sysparm_query=' + flt + '&sysparm_fields=sys_id').then(function(resp){
+			$scope.data.recordCount = resp.data.result.length;
+		});
+
+	}
+
+	getCount($scope.data.filter);
+/* END LAB 4 CHANGES */
+
+/*
+	LAB 3: Everything from here to the end is new code.
+	1. We are going to "watch" for the "chart.click" event emitted by the embedded chart widget.
+	2. We are going to define a "formWidget" property for our current scope. Note that we modified the HTML in the previous step to check for this property.
+	3. We are going to redefine the "watch" on our data_table.click" event.
+	4. We are going to "watch" for an embedded modal's "closed" event.
+*/
+// Watch for the chart click event.
 	$scope.$on('chart.click',function(evt,parms){
 		console.log(parms);
 		// Toggle showTable to true to show the table
@@ -82,7 +122,7 @@
 	$scope.$on('sp.widget-modal.closed',function(){
 		$scope.formWidget = '';
 	});
-	/* END LAB 3 CHANGES */
+/* END LAB 3 CHANGES */
 }]]></client_script>
         <controller_as>c</controller_as>
         <css/>
@@ -252,30 +292,34 @@
         <sys_created_by>nicholas.yancer</sys_created_by>
         <sys_created_on>2019-04-02 15:01:28</sys_created_on>
         <sys_id>a58ca3350f2477404e0b489ce1050e23</sys_id>
-        <sys_mod_count>9</sys_mod_count>
+        <sys_mod_count>10</sys_mod_count>
         <sys_name>Combined Donut and Table</sys_name>
         <sys_package display_value="CreatorCon Lab - Single Page Apps" source="x_10227_creatorcon">cfea0f7d0fec37404e0b489ce1050e87</sys_package>
         <sys_policy/>
         <sys_scope display_value="CreatorCon Lab - Single Page Apps">cfea0f7d0fec37404e0b489ce1050e87</sys_scope>
         <sys_update_name>sp_widget_a58ca3350f2477404e0b489ce1050e23</sys_update_name>
         <sys_updated_by>nicholas.yancer</sys_updated_by>
-        <sys_updated_on>2019-04-02 16:23:23</sys_updated_on>
-        <template><![CDATA[<div>
+        <sys_updated_on>2019-04-02 17:33:13</sys_updated_on>
+        <template><![CDATA[<!--  LAB 4: We are now making the entire widget visible conditional on whether or not it is the currentComponent registered with our Angular service. NOTE: What would happen if we used ng-if heer instead? What would be the impact on performance or user experience? -->
+<div ng-show="c.widget.rectangle_id == c.pm.currentComponent">
+<!-- END LAB 4 CHANGE -->
   <div class="alert alert-danger" ng-if="data.invalid_table">
-	${Table not defined} '{{data.table_label}}'
+    ${Table not defined} '{{data.table_label}}'
   </div>
-  <!-- Toggle between chart and table view. The toggle will set the value of the showTable variable to true or false when clicked. Notice that we are binding the watchVar scope property in our directive to the current scope's showTable property through the watch-var attribute. -->
+  <!-- Toggle between chart and table view. The toggle will set the value of the showTable variable to true or false when clicked. -->
   <toggle-switch watch-var="showTable" title="Chart or Table" label-true="Table" label-false="Chart"></toggle-switch>
   <!-- If showTable is false, show the chart. Note the use of ng-if here. The angular chartJS code checks on the chart at regular intervals.
-		If the chart canvas is hidden when that check is performed there is an error and the next time you try to show the chart it will not render correctly. -->
-  <div ng-if="!showTable">
-	<sp-widget ng-if="!!data.donutWidget" widget="data.donutWidget"></sp-widget>
+If the chart canvas is hidden when that check is performed there is an error and the next time you try to show the chart it will not render correctly. -->
+<!-- LAB 4: In addition to watching "showTable," we are also making existence conditional on whether the widget is the curentComponent registered with the Angular service -->
+  <div ng-if="showTable == false && c.widget.rectangle_id == c.pm.currentComponent">
+<!-- END LAB 4 CHANGE -->
+    <sp-widget ng-if="!!data.donutWidget" widget="data.donutWidget"></sp-widget>
   </div>
 
   <!-- If showTable is true, then show the data table widget. Note that it is okay to use ng-show here,
-	as there is no requirement that the data table is visible for other processes. -->
+as there is no requirement that the data table is visible for other processes. -->
   <div ng-show="showTable">
-	<sp-widget ng-if="data.dataTableWidget" widget="data.dataTableWidget"></sp-widget>
+    <sp-widget ng-if="data.dataTableWidget" widget="data.dataTableWidget"></sp-widget>
   </div>
 
   <!-- LAB 3: If we have a form widget, embed it. We will instantiate a widget if we click on the data table. -->

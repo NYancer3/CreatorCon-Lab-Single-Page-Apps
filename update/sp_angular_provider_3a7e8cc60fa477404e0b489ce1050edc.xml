@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_angular_provider">
+    <sp_angular_provider action="INSERT_OR_UPDATE">
+        <name>k19PageManager</name>
+        <script><![CDATA[function(){
+
+    // Keep track of all the components on the page
+    this.pageComponents = {};
+
+    // Provide an option for adding to the page components
+    this.registerComponent = function(cObj){
+        console.log(cObj);
+        this.pageComponents[cObj.rectangle_id] = cObj;
+        console.log(this.pageComponents);
+    };
+
+    // Initialize a property for the current component.
+    this.currentComponent = '';
+
+	// Provide a method to set the curent component.
+    this.setCurrent = function(cName){
+        this.currentComponent = cName;
+    };
+
+	// Provide a method to reset the page manager. Used on "reload" of the page (note that updating the location in the serrvice portal is not the same aserfershing the browser, so the service will be persistent).
+    this.reset = function(){
+        this.pageComponents = {};
+        this.currentComponent = '';
+    };
+
+}]]></script>
+        <sys_class_name>sp_angular_provider</sys_class_name>
+        <sys_created_by>nicholas.yancer</sys_created_by>
+        <sys_created_on>2019-04-02 17:30:11</sys_created_on>
+        <sys_id>3a7e8cc60fa477404e0b489ce1050edc</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>k19PageManager</sys_name>
+        <sys_package display_value="CreatorCon Lab - Single Page Apps" source="x_10227_creatorcon">cfea0f7d0fec37404e0b489ce1050e87</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="CreatorCon Lab - Single Page Apps">cfea0f7d0fec37404e0b489ce1050e87</sys_scope>
+        <sys_update_name>sp_angular_provider_3a7e8cc60fa477404e0b489ce1050edc</sys_update_name>
+        <sys_updated_by>nicholas.yancer</sys_updated_by>
+        <sys_updated_on>2019-04-02 17:30:11</sys_updated_on>
+        <type>service</type>
+    </sp_angular_provider>
+</record_update>
